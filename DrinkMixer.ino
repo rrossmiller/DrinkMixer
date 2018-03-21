@@ -24,21 +24,29 @@
  *  "Your Drink is done. Enjoy!"
  */
 
-// include the Servo library
-#include <Servo.h>
+// Valves
+int alcValvePin; // attach the alcohol valve to a digital pin
+int mixValvePin; // attach the mixer valveto a digital pin
 
-Servo myServo;  // create a servo object
 
+// Potentiometer
 int const potPin = A0; // analog pin used to connect the potentiometer
 int potVal;  // variable to read the value from the analog pin
 int angle;   // variable to hold the angle for the servo motor
 
  void setup() 
 {
-
+  
 }
 
 void loop() 
 {
-
+  potVal = analogRead(potPin); // read the value of the potentiometer
+  // print out the value to the Serial Monitor
+  Serial.print("potVal: ");
+  Serial.print(potVal);
 }
+
+
+
+
