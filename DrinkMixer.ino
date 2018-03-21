@@ -24,6 +24,12 @@
  *  "Your Drink is done. Enjoy!"
  */
 
+#include <LiquidCrystal.h>
+
+// Init LiquidCrystal object with pins corresponding to Crystal Ball project
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
+
 // Valves
 int alcValvePin; // attach the alcohol valve to a digital pin
 int mixValvePin; // attach the mixer valveto a digital pin
@@ -37,6 +43,7 @@ int angle;   // variable to hold the angle for the servo motor
  void setup() 
 {
     Serial.begin(9600); // open a serial connection to your computer
+    lcd.begin(16, 2); //begin reading/writing to LCD monitor
 }
 
 void loop() 
