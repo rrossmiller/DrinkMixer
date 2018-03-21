@@ -36,7 +36,7 @@ int angle;   // variable to hold the angle for the servo motor
 
  void setup() 
 {
-  
+    Serial.begin(9600); // open a serial connection to your computer
 }
 
 void loop() 
@@ -44,7 +44,9 @@ void loop()
   potVal = analogRead(potPin); // read the value of the potentiometer
   // print out the value to the Serial Monitor
   Serial.print("potVal: ");
-  Serial.print(potVal);
+  Serial.println(potVal);
+  delay(100);
+  
 }
 
 
