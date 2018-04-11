@@ -24,6 +24,7 @@
  *  "Your Drink is done. Enjoy!"
  */
 
+
 #include <LiquidCrystal.h>
 
 // Init LiquidCrystal object with pins corresponding to Crystal Ball project
@@ -38,20 +39,28 @@ int const potPin = A0; // analog pin used to connect the potentiometer
 int potVal;  // variable to read the value from the analog pin
 
 // Flow meters
-int 
+int alcoholMeterPin;
+int mixerMeterPin;
 
 // Other pins
 int confirmButtonState = 0;
 int confirmButtonPin;
 
 int drinkStrength;
+int drinkStrengthAnalog;
+
+// Booleans
+bool correctVolume = false;
+
+// Cup features
+int cupVol = 295 // 295 mL = 10 fl oz
+int mixerVol;
 
  void setup() 
 {
     Serial.begin(9600); // open a serial connection to your computer
     lcd.begin(16, 2); //begin reading/writing to LCD monitor
     pinMode(confirmButtonPin, INPUT);
-    pinMode(killButtonPin, INPUT);
 }
 
 void loop() 
@@ -67,28 +76,69 @@ void loop()
     }
 
     confirmButtonState = 0;
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("Strength: ");
+    lcd.setCursor(0,1);
+    lcd.print("Push Confirm to continue");
     while(confirmButtonState == 0)
     {
-      lcd.clear();
-      lcd.print("Current Strength: ");
+      lcd.setCursor(10,0);
       lcd.println(drinkStrength());
-      lcd.print("Push Confirm to continue");
+      drinkStrengthAnalog = analogRead(potPin);
       confirmButtonState = digitalRead(confirmButtonPin);
     }
 
     confirmButtonState = 0;
     // Start mixing drink
     lcd.clear();
+    lcd.setCursor(0,0);
     lcd.print("Mixing...");
-    
+    // dispense alcohol
+    dispense();
   
 }
 
-
-int drinkStrenght()
+/*
+ * drinkStrength function:
+ */
+int drinkStrength()
 {
   drinkStrength = map(potVal, 0, 1023, 0, 10);
   return drinkStrength;
 }
+
+/*
+ * dispense function:
+ */
+
+void dispense()
+{
+    int measure = 0;
+    int volToDispense = map(drinkStrengthAnalog, 0, 1023, 0, cupVol/4)
+    mixerVol = cupVol-dispenseVol; // fill the rest of the cup with mixer
+
+    // each pulse is ~2.25 mL
+    int pulses = 0;
+    while(!correctVolume)
+    {
+      // open the alcohol valve
+      digitalWrite(alcoholValvePin,HIGH);
+      
+      // measure flow
+      if(digitalRead(AlcoholMeterPin) == 1)
+        pulses++;
+
+      measure = pulses * 2.25;
+/*     CODE UP TO HERE 
+      // close valve when correct volume measured
+      if(measure > volToDispense)
+      {
+        digitalWrite(AlcoholValvePin,LOW)
+      }
+ */
+    }
+}
+
 
 
