@@ -94,23 +94,16 @@ void loop()
     lcd.clear();
     lcd.setCursor(0,0);
     lcd.print("Mixing...");
-    // dispense alcohol
+    // dispense drink
     dispense();
   
 }
 
-/*
- * drinkStrength function:
- */
 int drinkStrength()
 {
   drinkStrength = map(potVal, 0, 1023, 0, 10);
   return drinkStrength;
 }
-
-/*
- * dispense function:
- */
 
 void dispense()
 {
@@ -126,17 +119,16 @@ void dispense()
       digitalWrite(alcoholValvePin,HIGH);
       
       // measure flow
-      if(digitalRead(AlcoholMeterPin) == 1)
+      if(digitalRead(alcoholMeterPin) == 1)
         pulses++;
 
-      measure = pulses * 2.25;
-/*     CODE UP TO HERE 
+      measure = pulses * 2.25; // make global?
       // close valve when correct volume measured
-      if(measure > volToDispense)
+      if(measure >= volToDispense)
       {
-        digitalWrite(AlcoholValvePin,LOW)
+        digitalWrite(alcoholValvePin,LOW)
+        correctVolume = true;
       }
- */
     }
 }
 
