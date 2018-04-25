@@ -1,27 +1,7 @@
-/*  Work Flow
- *  
- *  "Place cup under spout. Press 'Confirm' button to continue"
- *  
- *  Once the button is pushed
- *  "Adjust Strength"
- *  "Current Strength: "
- *  -- User uses potentiometer to adjust strength
- *  
- *  User pushes 'Confirm'
- *    Open alcohol valve
- *    Measure alcohol output
- *    Close alcohol valve when correct amount has been released
- *    
- *    Open mixer valve
- *    Measure mixer output
- *    Close mixer valve when correct amount has been released
- *    
- *  User pushes 'Cancel' AT ANY TIME
- *    Machine stops -- important that this comes first
- *    "Canceling"
- *    Arduino/variables reset
- *      Process returns to the beginning
- *  "Your Drink is done. Enjoy!"
+/*
+ * Arduino code for lab project for BSE 365. This code is for automatically dispensing a drink with two liquid ingredients.
+ * 
+ * Authors: Rob Rossmiller, Matthey Caulfield
  */
 
 
@@ -31,20 +11,20 @@
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
 // Valves
-int alcValvePin; // attach the alcohol valve to a digital pin
-int mixValvePin; // attach the mixer valveto a digital pin
+int alcValvePin = 1; // attach the alcohol valve to a digital pin
+int mixerValvePin = 1; // attach the mixer valveto a digital pin
 
 // Potentiometer
 int const potPin = A0; // analog pin used to connect the potentiometer
 
 // Flow meters
-int alcoholMeterPin;
-int mixerMeterPin;
-int flowMeterCalibration = 5.14 // mL/pulse
+int alcoholMeterPin = 1;
+int mixerMeterPin = 1;
+int flowMeterCalibration = 5.14; // mL/pulse
 
 // Other pins
 int confirmButtonState = 0;
-int confirmButtonPin;
+int confirmButtonPin = 1;
 
 int drinkStrength;
 int drinkStrengthAnalog;
@@ -53,7 +33,8 @@ int drinkStrengthAnalog;
 bool correctVolume = false;
 
 // Cup features
-int cupVol = 295 // 295 mL = 10 fl oz
+int cupVol = 295; // 295 mL = 10 fl oz
+int alcoholVol;
 int mixerVol;
 
  void setup() 
@@ -84,7 +65,7 @@ void loop()
     while(confirmButtonState == 0)
     {
       lcd.setCursor(10,0);
-      lcd.println(drinkStrength());
+      lcd.println(getDrinkStrength());
       drinkStrengthAnalog = analogRead(potPin);
       confirmButtonState = digitalRead(confirmButtonPin);
     }
@@ -110,7 +91,7 @@ void loop()
   
 }
 
-int drinkStrength()
+int getDrinkStrength()
 {
   drinkStrength = map(analogRead(potPin), 0, 1023, 0, 10);
   return drinkStrength;
@@ -119,15 +100,15 @@ int drinkStrength()
 void dispense()
 {
     int measured = 0;
-    int alcoholToDispense = map(drinkStrengthAnalog, 0, 1023, 0, cupVol/4)
-    mixerToDispense = cupVol-alcoholToDispense; // fill the rest of the cup with mixer
+    int alcoholToDispense = map(drinkStrengthAnalog, 0, 1023, 0, cupVol/4);
+    int mixerToDispense = cupVol-alcoholToDispense; // fill the rest of the cup with mixer
 
     // each pulse is ~5.14 mL
     int pulses = 0;
 
     if(!correctVolume)
       // open the alcohol valve
-      digitalWrite(alcoholValvePin,HIGH);
+      digitalWrite(alcValvePin,HIGH);
       
     while(!correctVolume)
     {
@@ -137,9 +118,9 @@ void dispense()
 
       measured = pulses * flowMeterCalibration; 
       // close valve when correct volume measured
-      if(measure >= alcoholToDispense)
+      if(measured >= alcoholToDispense)
       {
-        digitalWrite(alcoholValvePin,LOW)
+        digitalWrite(alcValvePin,LOW);
         correctVolume = true;
       }
     }
@@ -164,7 +145,7 @@ void dispense()
       // close valve when correct volume measured
       if(measured >= mixerToDispense)
       {
-        digitalWrite(mixerValvePin,LOW)
+        digitalWrite(mixerValvePin,LOW);
         correctVolume = true;
       }
     }
