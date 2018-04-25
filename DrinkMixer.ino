@@ -105,6 +105,7 @@ void dispense()
     lcd.clear();
     lcd.setCursor(0,0);
     lcd.print("Mixing...");
+    
     int measured = 0; // current volume dispensed
     int alcoholToDispense = map(drinkStrengthAnalog, 0, 1023, 0, cupVol/4); // alcohol to be dispensed based on selected drink strenght. Max is 1/4 cup volume
     int mixerToDispense = cupVol-alcoholToDispense;                        // fill the rest of the cup with mixer
@@ -123,15 +124,20 @@ void dispense()
         pulses++;
 
       measured = pulses * flowMeterCalibration; 
+Serial.println(pulses);
+Serial.println(measured);
+Serial.println();
       // close valve when correct volume measured
       if(measured >= alcoholToDispense)
       {
         digitalWrite(alcValvePin,LOW);
         correctVolume = true;
       }
+      delay(100);
     }
 
     // reset variables
+    delay(1000);
     correctVolume = false;
     measured = 0;
     pulses = 0;
@@ -154,7 +160,9 @@ void dispense()
         digitalWrite(mixerValvePin,LOW);
         correctVolume = true;
       }
+      delay(100);
     }
+    
 }
 
 
