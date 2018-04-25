@@ -40,6 +40,7 @@ int const potPin = A0; // analog pin used to connect the potentiometer
 // Flow meters
 int alcoholMeterPin;
 int mixerMeterPin;
+int flowMeterCalibration = 5.14 // mL/pulse
 
 // Other pins
 int confirmButtonState = 0;
@@ -87,14 +88,25 @@ void loop()
       drinkStrengthAnalog = analogRead(potPin);
       confirmButtonState = digitalRead(confirmButtonPin);
     }
-
     confirmButtonState = 0;
+    
     // Start mixing drink
     lcd.clear();
     lcd.setCursor(0,0);
     lcd.print("Mixing...");
     // dispense drink
     dispense();
+    
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.println("Drink is ready.");
+    lcd.print("Press Confirm to reset");
+
+     while(confirmButtonState == 0)
+    {
+      confirmButtonState = digitalRead(confirmButtonPin);
+    }
+    
   
 }
 
@@ -106,9 +118,9 @@ int drinkStrength()
 
 void dispense()
 {
-    int measure = 0;
-    int volToDispense = map(drinkStrengthAnalog, 0, 1023, 0, cupVol/4)
-    mixerVol = cupVol-volToDispense; // fill the rest of the cup with mixer
+    int measured = 0;
+    int alcoholToDispense = map(drinkStrengthAnalog, 0, 1023, 0, cupVol/4)
+    mixerToDispense = cupVol-alcoholToDispense; // fill the rest of the cup with mixer
 
     // each pulse is ~5.14 mL
     int pulses = 0;
@@ -123,11 +135,36 @@ void dispense()
       if(digitalRead(alcoholMeterPin) == 1)
         pulses++;
 
-      measure = pulses * 5.14; // make global?
+      measured = pulses * flowMeterCalibration; 
       // close valve when correct volume measured
-      if(measure >= volToDispense)
+      if(measure >= alcoholToDispense)
       {
         digitalWrite(alcoholValvePin,LOW)
+        correctVolume = true;
+      }
+    }
+
+    // reset variables
+    correctVolume = false;
+    measured = 0;
+    pulses = 0;
+    
+    // Dispense Mixer
+    if(!correctVolume)
+      // open the alcohol valve
+      digitalWrite(mixerValvePin,HIGH);
+      
+    while(!correctVolume)
+    {
+      // measure flow
+      if(digitalRead(mixerMeterPin) == 1)
+        pulses++;
+
+      measured = pulses * flowMeterCalibration; 
+      // close valve when correct volume measured
+      if(measured >= mixerToDispense)
+      {
+        digitalWrite(mixerValvePin,LOW)
         correctVolume = true;
       }
     }
