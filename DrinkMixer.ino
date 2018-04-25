@@ -48,56 +48,63 @@ void loop()
 {
     // Welcome user
     lcd.clear();
-    lcd.println("Place cup under spout");
-    lcd.print("Press Confirm to continue");
-
+    lcd.setCursor(0,0);
+    lcd.print("Insert cup");
+    lcd.setCursor(0,1);
+    lcd.print("Push confirm");
+    
     while(confirmButtonState == 0) // wait for the confirm botton to be pushed
     {
       confirmButtonState = digitalRead(confirmButtonPin); // pushing the confirm button signals that a cup is under the spout
     }
-
+    
+    delay(1000);
     confirmButtonState = 0;                 // reset the confirmButton state
     lcd.clear();                            // clear the lcd display
     lcd.setCursor(0,0);                     // set the cursor to the first column of the first row
     lcd.print("Strength: ");                // display the strength of the drink to be made
     lcd.setCursor(0,1);
-    lcd.print("Push Confirm to continue");
+    lcd.print("Push Confirm");
     while(confirmButtonState == 0)
     {
       lcd.setCursor(10,0);
-      lcd.println(getDrinkStrength());
+      lcd.print(getDrinkStrength());
       confirmButtonState = digitalRead(confirmButtonPin);    // check if the button has been pushed
     }
     confirmButtonState = 0;        // reset the confirmButton state
     
     // Start mixing drink
-    lcd.clear();
-    lcd.setCursor(0,0);
-    lcd.print("Mixing...");
     // dispense drink
+    delay(1000);  
     dispense();
-    
+    delay(1000);
+
     lcd.clear();
     lcd.setCursor(0,0);
-    lcd.println("Drink is ready.");
-    lcd.print("Press Confirm to reset");
+    lcd.print("Drink is ready");
+    lcd.setCursor(0,1);
+    lcd.print("Press Confirm");
 
      while(confirmButtonState == 0)
     {
       confirmButtonState = digitalRead(confirmButtonPin);
     }
+    confirmButtonState = 0;
   
 }
 
 int getDrinkStrength()
 {
   drinkStrengthAnalog = analogRead(potPin);              // store the selected strength
-  drinkStrength = map(drinkStrengthAnalog, 0, 1023, 0, 10);  // read the current potentiometer value and map it from 0 to 10
+  drinkStrength = map(drinkStrengthAnalog, 0, 1023, 1, 10);  // read the current potentiometer value and map it from 0 to 10
   return drinkStrength; // return the drink strength so it can be displayed
 }
 
 void dispense()
 {
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("Mixing...");
     int measured = 0; // current volume dispensed
     int alcoholToDispense = map(drinkStrengthAnalog, 0, 1023, 0, cupVol/4); // alcohol to be dispensed based on selected drink strenght. Max is 1/4 cup volume
     int mixerToDispense = cupVol-alcoholToDispense;                        // fill the rest of the cup with mixer
