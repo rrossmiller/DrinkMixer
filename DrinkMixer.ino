@@ -36,7 +36,6 @@ int mixValvePin; // attach the mixer valveto a digital pin
 
 // Potentiometer
 int const potPin = A0; // analog pin used to connect the potentiometer
-int potVal;  // variable to read the value from the analog pin
 
 // Flow meters
 int alcoholMeterPin;
@@ -101,7 +100,7 @@ void loop()
 
 int drinkStrength()
 {
-  drinkStrength = map(potVal, 0, 1023, 0, 10);
+  drinkStrength = map(analogRead(potPin), 0, 1023, 0, 10);
   return drinkStrength;
 }
 
@@ -109,20 +108,22 @@ void dispense()
 {
     int measure = 0;
     int volToDispense = map(drinkStrengthAnalog, 0, 1023, 0, cupVol/4)
-    mixerVol = cupVol-dispenseVol; // fill the rest of the cup with mixer
+    mixerVol = cupVol-volToDispense; // fill the rest of the cup with mixer
 
-    // each pulse is ~2.25 mL
+    // each pulse is ~5.14 mL
     int pulses = 0;
-    while(!correctVolume)
-    {
+
+    if(!correctVolume)
       // open the alcohol valve
       digitalWrite(alcoholValvePin,HIGH);
       
+    while(!correctVolume)
+    {
       // measure flow
       if(digitalRead(alcoholMeterPin) == 1)
         pulses++;
 
-      measure = pulses * 2.25; // make global?
+      measure = pulses * 5.14; // make global?
       // close valve when correct volume measured
       if(measure >= volToDispense)
       {
