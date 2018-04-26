@@ -96,7 +96,7 @@ void loop()
 int getDrinkStrength()
 {
   drinkStrengthAnalog = analogRead(potPin);              // store the selected strength
-  drinkStrength = map(drinkStrengthAnalog, 0, 1023, 1, 10);  // read the current potentiometer value and map it from 0 to 10
+  drinkStrength = map(drinkStrengthAnalog, 0, 1023, 0, 10);  // read the current potentiometer value and map it from 0 to 10
   return drinkStrength; // return the drink strength so it can be displayed
 }
 
@@ -109,14 +109,15 @@ void dispense()
     int measured = 0; // current volume dispensed
     int alcoholToDispense = map(drinkStrengthAnalog, 0, 1023, 0, cupVol/4); // alcohol to be dispensed based on selected drink strenght. Max is 1/4 cup volume
     int mixerToDispense = cupVol-alcoholToDispense;                        // fill the rest of the cup with mixer
-
+Serial.println(alcoholToDispense);
+Serial.println(mixerToDispense);
+Serial.println();
     // each pulse is ~5.14 mL
     int pulses = 0;
 
-    if(!correctVolume)
-      // open the alcohol valve
-      digitalWrite(alcValvePin,HIGH);
-      
+    if(measured < alcoholToDispense) // open the alcohol valve if more is needed
+      digitalWrite(alcValvePin,HIGH);     
+           
     while(!correctVolume)
     {
       // measure flow
@@ -127,6 +128,7 @@ void dispense()
 Serial.println(pulses);
 Serial.println(measured);
 Serial.println();
+        
       // close valve when correct volume measured
       if(measured >= alcoholToDispense)
       {
@@ -142,18 +144,20 @@ Serial.println();
     measured = 0;
     pulses = 0;
     
-    // Dispense Mixer
-    if(!correctVolume)
-      // open the alcohol valve
-      digitalWrite(mixerValvePin,HIGH);
-      
+// Dispense Mixer
+    if(measured < mixerToDispense) // open the alcohol valve if more is needed
+      digitalWrite(mixerValvePin,HIGH); 
+
     while(!correctVolume)
     {
       // measure flow
       if(digitalRead(mixerMeterPin) == 1)
         pulses++;
 
-      measured = pulses * flowMeterCalibration; 
+      measured = pulses * flowMeterCalibration;
+Serial.println(pulses);
+Serial.println(measured);
+Serial.println();
       // close valve when correct volume measured
       if(measured >= mixerToDispense)
       {
