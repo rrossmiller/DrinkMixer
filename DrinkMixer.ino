@@ -21,7 +21,7 @@ int const potPin = A0; // analog pin used to connect the potentiometer
 // Flow meters
 int alcoholMeterPin = 13;
 int mixerMeterPin = 8;
-int flowMeterCalibration = 5.14; // mL per pulse
+int flowMeterCalibration = 20; // mL per pulse 
 
 // Other pins
 int confirmButtonState = 0;
@@ -31,7 +31,7 @@ int confirmButtonPin = 9;
 bool correctVolume = false;
 
 // Cup features
-int cupVol = 295; // 295 mL = 10 fl oz
+int cupVol = 200; // 295 mL = 10 fl oz
 int alcoholVol;
 int mixerVol;
 int drinkStrength;
@@ -42,10 +42,16 @@ int drinkStrengthAnalog;
     Serial.begin(9600); // open a serial connection to your computer
     lcd.begin(16, 2); //begin reading/writing to LCD monitor, 16 col x 2 row
     pinMode(confirmButtonPin, INPUT);
+    pinMode(alcoholMeterPin, INPUT);
+    pinMode(mixerMeterPin, INPUT);
+    pinMode(alcValvePin, OUTPUT);
+    pinMode(mixerValvePin, OUTPUT);
 }
 
 void loop() 
 {
+Serial.println("Loop Start");
+
     // Welcome user
     lcd.clear();
     lcd.setCursor(0,0);
@@ -90,6 +96,8 @@ void loop()
       confirmButtonState = digitalRead(confirmButtonPin);
     }
     confirmButtonState = 0;
+    delay(500);
+
   
 }
 
@@ -102,16 +110,27 @@ int getDrinkStrength()
 
 void dispense()
 {
+Serial.println("Dispensing");
     lcd.clear();
     lcd.setCursor(0,0);
     lcd.print("Mixing...");
     
     int measured = 0; // current volume dispensed
-    int alcoholToDispense = map(drinkStrengthAnalog, 0, 1023, 0, cupVol/4); // alcohol to be dispensed based on selected drink strenght. Max is 1/4 cup volume
+    int alcoholToDispense = map(drinkStrengthAnalog, 0, 1023, 0, cupVol/3); // alcohol to be dispensed based on selected drink strenght. Max is 1/4 cup volume
     int mixerToDispense = cupVol-alcoholToDispense;                        // fill the rest of the cup with mixer
-Serial.println(alcoholToDispense);
-Serial.println(mixerToDispense);
-Serial.println();
+    
+int displayPulseAlc = alcoholToDispense/flowMeterCalibration;
+int displayPulseMix = mixerToDispense/flowMeterCalibration;
+//Serial.print("mL Alc: ");
+//Serial.println(alcoholToDispense);
+Serial.print("Pulses: ");
+Serial.println(displayPulseAlc);
+//Serial.print("mL Mix: ");
+//Serial.println(mixerToDispense);
+Serial.print("Pulses: ");
+Serial.println(displayPulseMix);
+//Serial.println();
+delay(3000);
     // each pulse is ~5.14 mL
     int pulses = 0;
 
@@ -125,9 +144,12 @@ Serial.println();
         pulses++;
 
       measured = pulses * flowMeterCalibration; 
+Serial.println("Alcohol");
+Serial.print("Pulses: ");
 Serial.println(pulses);
-Serial.println(measured);
-Serial.println();
+//Serial.print("Measured: ");
+//Serial.println(measured);
+//Serial.println();
         
       // close valve when correct volume measured
       if(measured >= alcoholToDispense)
@@ -155,9 +177,12 @@ Serial.println();
         pulses++;
 
       measured = pulses * flowMeterCalibration;
+Serial.println("MIXER");
+Serial.print("Pulses: ");
 Serial.println(pulses);
-Serial.println(measured);
-Serial.println();
+//Serial.print("Measured: ");
+//Serial.println(measured);
+//Serial.println();
       // close valve when correct volume measured
       if(measured >= mixerToDispense)
       {
@@ -166,7 +191,11 @@ Serial.println();
       }
       delay(100);
     }
-    
+     // reset variables
+    delay(1000);
+    correctVolume = false;
+    measured = 0;
+    pulses = 0;
 }
 
 
